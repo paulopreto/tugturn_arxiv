@@ -15,6 +15,8 @@
 \usepackage{xcolor}
 \usepackage{orcidlink}
 \usepackage{tikz}
+\usepackage{algorithm}
+\usepackage{algorithmic}
 \usepackage{pdfpages}
 \usetikzlibrary{arrows.meta, positioning}
 \AtBeginDocument{\setlength{\headheight}{23pt}}
@@ -61,6 +63,8 @@ Instrumented Timed Up and Go (TUG) analysis can support clinical and research de
 \section{Introduction}
 Timed Up and Go (TUG) is widely used to evaluate mobility and functional performance in clinical populations because it integrates postural transition, walking, turning, and sitting in a single task \citep{podsiadlo1991}. Traditional motion-capture workflows provide high-fidelity biomechanical information, but they often depend on specialized infrastructure and time-consuming processing pipelines. Markerless approaches based on computer vision have expanded access to movement analysis and enabled broader deployment in rehabilitation and applied biomechanics \citep{lugaresi2019mediapipe, nath2019using}.
 
+Historically, gait events and turning metrics have been analyzed predominantly using standard optoelectronic kinematic systems, instrumented walkways, or force platforms \citep{khobkhun2022investigation, thanakamchokchai2025effects}. However, widely available full-body 3D-landmark frameworks custom-built for automated clinical phase segmentation remain scarce \citep{tahara2025predicting}. Without such specialized automated markerless tools, analyses in clinical or uncontrolled settings often resort to subjective visual recognition or labor-intensive manual frame-by-frame data processing. To overcome these limitations, the \textit{tugturn} method was developed to automate these demanding procedures, bridging the gap between raw video tracking and robust biomechanical endpoints.
+
 Despite this progress, many markerless pipelines still emphasize either pose extraction or generic gait summaries and do not provide a structured TUG-specific workflow with robust phase-aware event handling. In TUG, meaningful interpretation depends on correctly isolating movement phases (e.g., first gait versus second gait) and on reducing false event detections outside valid locomotor windows. This issue is particularly relevant in heterogeneous clinical recordings, where pauses, partial turns, and variable trajectories are common.
 
 The \textit{tugturn} module was designed to address this gap by integrating: (i) spatially constrained phase segmentation, (ii) gait-event detection based on relative-distance principles \citep{zeni2008}, (iii) phase-specific spatiotemporal metrics, (iv) Vector Coding for coordination analysis, and (v) Extrapolated Center of Mass (XCoM) indicators for dynamic stability assessment. The goal of this paper is to document the software architecture and reproducible processing flow of \textit{tugturn} as a practical tool for markerless 3D TUG analysis.
@@ -71,7 +75,7 @@ The \textit{tugturn} module was designed to address this gap by integrating: (i)
 
 The core implementation is organized around a \texttt{TUGAnalyzer} class in \texttt{tugturn.py}, which computes kinematic variables, segment boundaries, gait events, and report-ready outputs from a unified data structure.
 
-To demonstrate its applicability in real-world clinical scenarios, the \textit{tugturn} algorithm was evaluated on a comprehensive dataset comprising \textbf{324 continuous markerless kinematic sequences}. These data were collected from \textbf{37 individuals} with mild-to-moderate Parkinson's disease. The experimental protocol spanned three distinct assessment moments (baseline, immediately post-intervention, and a one-week follow-up), consisting of up to three TUG trials per moment: one requiring a right turn, one a left turn, and one allowing a free-choice turn. Out of 333 theoretical trials, the automated pipeline successfully processed 324 sequences, yielding a 97.3\% retention rate. The minor data attrition (9 trials) resulted strictly from external factors such as camera occlusions or upstream tracking artifacts. This high processing success rate underscores the robustness of the pipeline when handling the natural variability of clinical recordings.
+To demonstrate its applicability in real-world clinical scenarios, the \textit{tugturn} algorithm was evaluated on a comprehensive dataset comprising \textbf{324 continuous markerless kinematic sequences}. These data were collected from \textbf{37 individuals} with mild-to-moderate Parkinson's disease. The experimental protocol spanned three distinct assessment moments (baseline, immediately post-intervention, and a one-week follow-up), consisting of up to three TUG trials per moment: one requiring a right turn, one a left turn, and one allowing a free-choice turn. Out of 333 total acquired trials, the automated pipeline successfully processed 324 sequences, yielding a 97.3\% retention rate. The minor data attrition (9 trials) resulted strictly from external factors such as camera occlusions or upstream tracking artifacts. This high processing success rate underscores the robustness of the pipeline when handling the natural variability of clinical recordings.
 
 For the reference run described in this manuscript, the 3D input file is
 \texttt{tugturn/s26\_m1\_t1.csv}. This file contains the frame-wise markerless
@@ -99,6 +103,10 @@ the file can override segmentation thresholds (\texttt{y\_chair}, \texttt{y\_tur
 \texttt{y\_chair\_tol}) for protocol-specific setups.
 
 \subsection{Phase Segmentation}
+
+Gait-event detection and turn segmentation in the TUG were performed in the tugturn.py module using a hybrid spatiotemporal approach. First, a walking mask was constructed to restrict analysis to locomotion periods by combining upright posture (derived from the pelvis vertical trajectory) with horizontal progression velocity. Next, heel-strike (HS) and toe-off (TO) events were extracted by projecting heel and forefoot markers onto the pelvis unit progression vector, with temporal smoothing and minimum peak distance/prominence constraints to reduce false positives. 
+The turn phase was defined using anteroposterior spatial rules (chair threshold and turn zone) and refined through axial kinematics, using the peak rate of change in the shoulder yaw angle to identify turn180 onset and offset. Finally, HS/TO events outside first and second gait windows were removed, ensuring biomechanical consistency between event detection and functional TUG phase segmentation.
+
 Each trial is segmented into:
 \begin{itemize}
   \item \texttt{stand}
@@ -108,13 +116,13 @@ Each trial is segmented into:
   \item \texttt{sit}
 \end{itemize}
 
-Segmentation combines temporal logic and spatial thresholds along the anteroposterior axis, with configurable TOML parameters:
+Segmentation combines temporal logic and spatial thresholds along the anteroposterior axis. To ensure adaptability across distinct experimental setups and room dimensions, the fundamental limits of the capture area are fully configurable by the user via command-line flags or the TOML configuration file:
 \begin{itemize}
-  \item \texttt{y\_chair}
-  \item \texttt{y\_turn}
-  \item \texttt{y\_chair\_tol}
+  \item \texttt{-y/y\_chair}: Defines the AP coordinate distinguishing the chair from the walking path.
+  \item \texttt{-t/y\_turn}: Defines the AP coordinate indicating the target turn zone.
+  \item \texttt{y\_chair\_tol}: Specifies the spatial tolerance around these anchors.
 \end{itemize}
-The implementation uses smoothed CoM and foot trajectories to enforce clinically meaningful boundaries:
+By explicitly exposing these flags, researchers can align the physical constraints of the automated pipeline with their specific recorded protocol without modifying the underlying source code. The implementation uses smoothed CoM and foot trajectories to enforce clinically meaningful boundaries:
 \begin{enumerate}
   \item \textbf{Vertical transition detection (CoM\_z):} \texttt{stand} and \texttt{sit} boundaries are initialized from percentile-based CoM\_z amplitude.
   \item \textbf{First gait start:} first frame where a foot crosses the chair threshold (\texttt{y\_chair}).
@@ -136,6 +144,8 @@ p_{\text{toe}}(t)=\langle \mathbf{toe}_{xy}(t)-\mathbf{pelvis}_{xy}(t), \hat{\ma
 HS events are detected as peaks of $p_{\text{heel}}(t)$ and TO events as peaks of $-p_{\text{toe}}(t)$, after smoothing and minimum inter-event distance constraints.
 
 A walking mask (standing posture + pelvis macro-velocity threshold) is used to suppress false events during sit-to-stand, pause, turning, and stand-to-sit. After phase segmentation, events outside \texttt{gait\_1} and \texttt{gait\_2} are removed.
+
+Compared to traditional gait analysis—where steps are extracted via clean trajectories from reflective markers or force plate impulses—markerless tracking relies heavily on pixel-based machine learning inference, which often introduces high-frequency noise and keypoint flickering \citep{tahara2025predicting}. To mitigate this instability, particularly at the distal extremities, \textit{tugturn} computes the spatial average of multiple adjacent foot landmarks (e.g., ankle, heel, and toe-tip) to represent a more stable unified foot position when necessary. Furthermore, because sagittal limb velocity and acceleration signs can flip erroneously during hesitant gait or tracking glitches, the pipeline aggregates these derivatives into a 2D resultant scalar called Kinematic Magnitude ($|V_{yz}|$ and $|A_{yz}|$). This strategy, alongside the robust fictitious event filtering, ensures that spatiotemporal parameters reflect genuine locomotion cycles even under heterogeneous clinical conditions.
 
 The software computes:
 \begin{itemize}
@@ -167,19 +177,39 @@ where $l$ is approximated by mean vertical CoM. Phase-level XCoM deviations are 
 \subsection{Algorithmic Workflow (Pseudocode)}
 \textbf{Input:} 3D MediaPipe CSV file, optional TOML metadata/config, optional output path.\\
 \textbf{Output:} HTML reports, JSON report, and CSV databases (participants, results, steps, kinematics, vector coding).
-\begin{enumerate}
-  \item Load the 3D MediaPipe CSV file and TOML metadata; parse the FPS and spatial thresholds (\texttt{y\_chair}, \texttt{y\_turn}, \texttt{y\_chair\_tol}).
-  \item Initialize the \texttt{TUGAnalyzer}, estimate the CoM trajectory, and extract continuous kinematic data. This includes computing the Kin Magnitude, defined as the 2D resultant scalar magnitude (Euclidean norm) of velocity and acceleration in the sagittal plane.
-  \item Segment the trial into distinct spatial-temporal phases (\texttt{stand}, \texttt{gait\_1}, \texttt{turn180}, \texttt{gait\_2}, \texttt{sit}). Segmentation relies on anteroposterior Y-axis thresholds and spatial tolerances to robustly identify postural transitions and the turning zone boundaries.
-  \item Detect HS and TO gait events using a relative-distance method (Zeni algorithm).
-  \item Filter fictitious gait events by excluding those occurring outside valid walking phases (e.g., during turns or postural transitions) and applying spatial validity checks.
-  \item Compute spatiotemporal parameters and evaluate dynamic stability. Stability is assessed by calculating the XCoM trajectory, combining CoM position and velocity based on an inverted pendulum model.
-  \item Deduplicate simultaneous step detections and generate phase-level quality assurance artifacts (animated skeleton GIFs).
-  \item Compute continuous motor coordination metrics using the Vector Coding method. This evaluates axial coupling (e.g., trunk \textit{versus} pelvis) during turns and postural transitions, as well as sagittal limb coupling during gait phases.
-  \item Assemble a unified report object containing metadata, segmented phases, spatiotemporal metrics, step-level data, and coordination variables.
-  \item Export structured tabular databases: \texttt{*\_tug\_data.json}, \texttt{*\_bd\_participants.csv}, \texttt{*\_bd\_results.csv}, \texttt{*\_bd\_steps.csv}, and \texttt{*\_bd\_kinematics.csv}.
-  \item Generate interactive Plotly-based HTML reports (\texttt{*\_tug\_report\_interactive.html}) and static fallback reports (\texttt{*\_tug\_report.html}).
-\end{enumerate}
+
+\begin{algorithm}[H]
+\caption{Hybrid Detection of Gait Events and Turn Phase in TUG}
+\textbf{Input:} 3D trajectories of pelvis, heels, toes, shoulders; sampling frequency $f_s$ \\
+\textbf{Output:} $\{HS_R, TO_R, HS_L, TO_L\}$ and phase bounds $\{stand, gait\_1, stop, turn180, gait\_2, sit\}$
+\begin{algorithmic}[1]
+\State Compute pelvis center $\mathbf{p}_{pelvis}(t)$ and smooth signals
+\State Estimate standing mask from pelvis vertical trajectory percentiles
+\State Compute pelvis horizontal speed $v_{xy}(t)$
+\State \textbf{WalkingMask} $\gets$ \textbf{StandingMask} $\land \left(v_{xy}(t) > \tau_v\right)$
+
+\State Estimate unit progression vector $\hat{\mathbf{d}}(t)$ from smoothed pelvis velocity
+\For{each side $s \in \{Right, Left\}$}
+    \State Project heel-to-pelvis vector onto $\hat{\mathbf{d}}(t)$
+    \State Apply \textbf{WalkingMask} and detect local maxima $\rightarrow HS_s$
+    \State Project toe-to-pelvis vector onto $\hat{\mathbf{d}}(t)$
+    \State Invert projected signal, apply \textbf{WalkingMask}, detect maxima $\rightarrow TO_s$
+    \State Enforce minimum inter-event distance and peak prominence
+\EndFor
+
+\State Detect first-gait start at first frame where foot AP coordinate crosses $y_{chair}$
+\State Detect turn-zone anchor near AP peak ($y_{turn}\pm y_{tol}$)
+\State Find stop anchor as minimum smoothed trunk-speed window near turn zone
+\State Compute shoulder yaw rate $\omega_{yaw}(t)$ from shoulder vector angle derivative
+\State Identify turn peak as $\arg\max(\omega_{yaw})$ in post-stop search window
+\State Expand second-gait/first-gait from peak until $\omega_{yaw}(t) < \tau_{yaw}$ to obtain $(turn\_start, turn\_end)$
+\State Define second-gait start from sustained negative AP velocity
+\State Define second-gait end when feet cross below $y_{chair}$
+\State Enforce contiguous non-negative phase durations
+\State Remove HS/TO events outside $\{gait\_1, gait\_2\}$
+\State \Return gait events and TUG phase segmentation
+\end{algorithmic}
+\end{algorithm}
 
 \section{Reproducibility and Usage}
 \subsection{Command-Line Execution}
