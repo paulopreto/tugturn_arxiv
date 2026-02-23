@@ -1,0 +1,40 @@
+\begin{thebibliography}{4}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Podsiadlo and Richardson(1991)]{podsiadlo1991}
+Diane Podsiadlo and Sandra Richardson.
+\newblock The timed up \& go: a test of basic functional mobility for frail
+  elderly persons.
+\newblock \emph{Journal of the American Geriatrics Society}, 39\penalty0
+  (2):\penalty0 142--148, 1991.
+\newblock \doi{10.1111/j.1532-5415.1991.tb01616.x}.
+
+\bibitem[Lugaresi et~al.(2019)Lugaresi, Tang, Nash, McClanahan, Uboweja, Hays,
+  Zhang, Chang, Yong, Lee, Chang, Hua, Georg, and
+  Grundmann]{lugaresi2019mediapipe}
+Camillo Lugaresi, Jiuqiang Tang, Hadon Nash, Chris McClanahan, Esha Uboweja,
+  Michael Hays, Fan Zhang, Chuo-Ling Chang, Ming~Guang Yong, Juhyun Lee,
+  Wan-Teh Chang, Wei Hua, Manfred Georg, and Matthias Grundmann.
+\newblock Mediapipe: A framework for building perception pipelines, 2019.
+\newblock URL \url{https://arxiv.org/abs/1906.08172}.
+
+\bibitem[Nath et~al.(2019)Nath, Mathis, Chen, Patel, Bethge, and
+  Mathis]{nath2019using}
+Tanmay Nath, Alexander Mathis, An~Chi Chen, Amir Patel, Matthias Bethge, and
+  Mackenzie~Weygandt Mathis.
+\newblock Using deeplabcut for 3d markerless pose estimation across species and
+  behaviors.
+\newblock \emph{Nature protocols}, 14\penalty0 (7):\penalty0 2152--2176, 2019.
+
+\bibitem[Zeni et~al.(2008)Zeni, Richards, and Higginson]{zeni2008}
+Joseph~A. Zeni, James~G. Richards, and Jill~S. Higginson.
+\newblock Two simple methods for determining gait events during treadmill and
+  overground walking using kinematic data.
+\newblock \emph{Gait \& Posture}, 27\penalty0 (4):\penalty0 710--714, 2008.
+\newblock \doi{10.1016/j.gaitpost.2007.07.007}.
+
+\end{thebibliography}
