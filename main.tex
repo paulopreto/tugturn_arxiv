@@ -19,7 +19,7 @@
 \usetikzlibrary{arrows.meta, positioning}
 \AtBeginDocument{\setlength{\headheight}{23pt}}
 
-\title{\textit{tugturn}: A Markerless 3D Pipeline for Instrumented Timed Up and Go Phase Segmentation, Gait Events, and Stability Metrics}
+\title{tugturn: A Markerless 3D Pipeline for Instrumented Timed Up and Go Phase Segmentation, Gait Events, and Stability Metrics}
 
 \author{
   Abel Gon\c{c}alves Chinaglia\orcidlink{0000-0002-6955-7187}$^{1,2}$ \\
@@ -70,6 +70,31 @@ The \textit{tugturn} module was designed to address this gap by integrating: (i)
 \textit{tugturn} processes MediaPipe-based 3D CSV files generated from markerless pose estimation pipelines \citep{lugaresi2019mediapipe}. Execution supports both single-file and batch-directory modes through a command-line interface. Subject and trial parameters can be supplied in TOML files, allowing standardized runs across datasets.
 
 The core implementation is organized around a \texttt{TUGAnalyzer} class in \texttt{tugturn.py}, which computes kinematic variables, segment boundaries, gait events, and report-ready outputs from a unified data structure.
+
+For the reference run described in this manuscript, the 3D input file is
+\texttt{tugturn/s26\_m1\_t1.csv}. This file contains the frame-wise markerless
+3D trajectories (MediaPipe-derived landmarks) used to compute CoM, kinematics,
+gait events, and phase segmentation.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.92\textwidth]{images/fig_gait_markerless.png}
+  \caption{Markerless acquisition frame used to generate the 3D data for the reference run (\texttt{s26\_m1\_t1}). The pose-tracking overlay illustrates the visual source from which the CSV trajectories are derived.}
+  \label{fig:markerless_source_frame}
+\end{figure}
+
+The execution metadata for this run is provided in
+\texttt{tugturn/s26\_m1\_t1.toml}, which includes:
+\begin{itemize}
+  \item participant descriptors (\texttt{SEX}, \texttt{WEIGHT}, \texttt{HEIGHT}, \texttt{AGE}),
+  \item acquisition rate (\texttt{FPS}),
+  \item clinical/context labels (\texttt{STAGE\_HY}, \texttt{PERFORMANCE}, \texttt{TURNSIDE}).
+\end{itemize}
+
+In \textit{tugturn}, this TOML file is required to run with reproducible metadata
+and proper temporal scaling (FPS). When a \texttt{[spatial]} block is also provided,
+the file can override segmentation thresholds (\texttt{y\_chair}, \texttt{y\_turn},
+\texttt{y\_chair\_tol}) for protocol-specific setups.
 
 \subsection{Phase Segmentation}
 Each trial is segmented into:
