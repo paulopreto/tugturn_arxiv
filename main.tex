@@ -112,10 +112,28 @@ Segmentation combines temporal logic and spatial thresholds along the anteropost
   \item \texttt{y\_turn}
   \item \texttt{y\_chair\_tol}
 \end{itemize}
-This design improves robustness when trajectories include pauses, short hesitations, or non-ideal paths.
+The implementation uses smoothed CoM and foot trajectories to enforce clinically meaningful boundaries:
+\begin{enumerate}
+  \item \textbf{Vertical transition detection (CoM\_z):} \texttt{stand} and \texttt{sit} boundaries are initialized from percentile-based CoM\_z amplitude.
+  \item \textbf{Forward gait start:} first frame where a foot crosses the chair threshold (\texttt{y\_chair}).
+  \item \textbf{Turn-zone anchoring:} local maximum progression along Y near \texttt{y\_turn} (with tolerance).
+  \item \textbf{Pause and turn split:} low trunk-speed anchor followed by shoulder-yaw-rate peak to delimit \texttt{stop\_5s} and \texttt{turn180}.
+  \item \textbf{Backward gait end:} foot crossing back below \texttt{y\_chair}; remaining frames define \texttt{sit}.
+\end{enumerate}
+
+This hybrid spatial-temporal design improves robustness for slow, hesitant, and clinically irregular trajectories.
 
 \subsection{Gait Events and Kinematic Metrics}
-Heel-strike (HS) and toe-off (TO) events are estimated using a relative-distance strategy inspired by the method described by \citet{zeni2008}. Events are then filtered by expected phase windows to reduce fictitious detections outside valid gait segments.
+Heel-strike (HS) and toe-off (TO) events are estimated using a relative-distance strategy inspired by \citet{zeni2008}, with phase-aware masking for TUG. The method computes pelvis progression direction in the horizontal plane and projects heel/toe vectors onto this direction:
+\[
+p_{\text{heel}}(t)=\langle \mathbf{heel}_{xy}(t)-\mathbf{pelvis}_{xy}(t), \hat{\mathbf{d}}_{xy}(t)\rangle
+\]
+\[
+p_{\text{toe}}(t)=\langle \mathbf{toe}_{xy}(t)-\mathbf{pelvis}_{xy}(t), \hat{\mathbf{d}}_{xy}(t)\rangle
+\]
+HS events are detected as peaks of $p_{\text{heel}}(t)$ and TO events as peaks of $-p_{\text{toe}}(t)$, after smoothing and minimum inter-event distance constraints.
+
+A walking mask (standing posture + pelvis macro-velocity threshold) is used to suppress false events during sit-to-stand, pause, turning, and stand-to-sit. After phase segmentation, events outside \texttt{gait\_forward} and \texttt{gait\_back} are removed.
 
 The software computes:
 \begin{itemize}
@@ -131,7 +149,11 @@ To reduce sign ambiguity in sagittal derivatives, \textit{tugturn} also reports 
 \]
 
 \subsection{Coordination and Stability Metrics}
-\textbf{Vector Coding.} The pipeline computes coupling-angle series for trunk--pelvis and limb coordination analyses. Coupling angles are normalized to $[0, 360)$ and classified into canonical coordination patterns (e.g., in-phase and anti-phase classes), with percentages and variability summaries.
+\textbf{Vector Coding.} The pipeline computes coupling-angle series for trunk--pelvis and limb coordination analyses using:
+\[
+\gamma = \operatorname{atan2}(\Delta \theta_{\text{distal}}, \Delta \theta_{\text{proximal}})\;\;\text{mapped to}\;\;[0,360)
+\]
+For axial analysis, $\theta$ corresponds to trunk and pelvis yaw (XY plane). The coupling angle is classified into four canonical bins (\textit{In-Phase}, \textit{Anti-Phase}, \textit{Proximal-Phase}, \textit{Distal-Phase}), and summarized as percentage occupancy plus Coupling Angle Variability (CAV, circular SD). A limb Y-axis vector-coding variant is also computed during forward and backward gait phases.
 
 \textbf{XCoM.} Dynamic stability is estimated from Extrapolated Center of Mass:
 \[
