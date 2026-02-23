@@ -179,20 +179,6 @@ where $l$ is approximated by mean vertical CoM. Phase-level XCoM deviations are 
   \item Generate static and interactive HTML reports (\texttt{*\_tug\_report.html} and \texttt{*\_tug\_report\_interactive.html}).
 \end{enumerate}
 
-\begin{enumerate}
-  \item Load the 3D MediaPipe CSV file and TOML metadata; parse the FPS and spatial thresholds (\texttt{y\_chair}, \texttt{y\_turn}, \texttt{y\_chair\_tol}).
-  \item Initialize the \texttt{TUGAnalyzer}, estimate the CoM trajectory, and extract continuous kinematic data. This includes computing the Kin Magnitude, defined as the 2D resultant scalar magnitude (Euclidean norm) of velocity and acceleration in the sagittal plane.
-  \item Segment the trial into distinct spatial-temporal phases (\texttt{stand}, \texttt{gait\_forward}, \texttt{turn180}, \texttt{gait\_back}, \texttt{sit}). Segmentation relies on anteroposterior Y-axis thresholds and spatial tolerances to robustly identify postural transitions and the turning zone boundaries.
-  \item Detect HS and TO gait events using a relative-distance method (Zeni algorithm).
-  \item Filter fictitious gait events by excluding those occurring outside valid walking phases (e.g., during turns or postural transitions) and applying spatial validity checks.
-  \item Compute spatiotemporal parameters and evaluate dynamic stability. Stability is assessed by calculating the XCoM trajectory, combining CoM position and velocity based on an inverted pendulum model.
-  \item Deduplicate simultaneous step detections and generate phase-level quality assurance artifacts (animated skeleton GIFs).
-  \item Compute continuous motor coordination metrics using the Vector Coding method. This evaluates axial coupling (e.g., trunk \textit{versus} pelvis) during turns and postural transitions, as well as sagittal limb coupling during gait phases.
-  \item Assemble a unified report object containing metadata, segmented phases, spatiotemporal metrics, step-level data, and coordination variables.
-  \item Export structured tabular databases: \texttt{*\_tug\_data.json}, \texttt{*\_bd\_participants.csv}, \texttt{*\_bd\_results.csv}, \texttt{*\_bd\_steps.csv}, and \texttt{*\_bd\_kinematics.csv}.
-  \item Generate interactive Plotly-based HTML reports (\texttt{*\_tug\_report\_interactive.html}) and static fallback reports (\texttt{*\_tug\_report.html}).
-\end{enumerate}
-
 \section{Reproducibility and Usage}
 \subsection{Command-Line Execution}
 Example runs:
