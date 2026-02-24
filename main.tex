@@ -218,12 +218,11 @@ uv run vaila/tugturn.py -i tests/tugturn/s26_m1_t1.csv \
   -c tests/tugturn/s26_m1_t1.toml -o tests/tugturn/results/ -y 0.15
 
 # Single file without -o (auto output directory)
-uv run vaila/tugturn.py -i tests/tugturn/s26_m1_t1.csv \
+uv run vaila/tugturn.py -i tests/tugturn/s26_m1_t1.csv 
   -c tests/tugturn/s26_m1_t1.toml
 
 # Batch processing by directory
-uv run vaila/tugturn.py -i tests/tugturn/ \
-  -c tests/tugturn/s26_m1_t1.toml
+uv run vaila/tugturn.py -i tests/tugturn/ -c tests/tugturn/s26_m1_t1.toml
 \end{verbatim}
 
 \subsection{Expected Artifacts}
