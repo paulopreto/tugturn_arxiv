@@ -73,11 +73,11 @@ Despite this progress, many markerless pipelines still emphasize either pose ext
 The \textit{tugturn.py} module was designed to address this gap by integrating: (i) spatially constrained phase segmentation, (ii) gait-event detection based on relative-distance principles \citep{zeni2008}, (iii) phase-specific spatiotemporal metrics, (iv) Vector Coding for coordination analysis, and (v) Extrapolated Center of Mass (XCoM) indicators for dynamic stability assessment. The goal of this paper is to document the software architecture and reproducible processing flow of \textit{tugturn.py} as a practical tool for markerless 3D TUG analysis.
 
 \section{Software Architecture and Methodology}
-The \textit{tugturn.py} module is designed as a highly cohesive command-line interface (CLI) driven tool. It ingests 3D coordinate time-series (typically derived from MediaPipe and processed via the \textit{vail\'{a}} framework) and executes a multi-stage deterministic pipeline. When \textit{vail\'{a}} is used as a Graphical User Interface (GUI), the pipeline can be initiated by selecting the \textit{tugturn} button, as illustrated in Figure~\ref{fig:vaila_gui}.
+The \textit{tugturn.py} module is designed as a highly cohesive command-line interface (CLI) driven tool. It ingests 3D coordinate time-series (typically derived from MediaPipe and processed via the \textit{vail\'{a}} \citep{vaila2024} framework) and executes a multi-stage deterministic pipeline. When \textit{vail\'{a}}  is used as a Graphical User Interface (GUI), the pipeline can be initiated by selecting the \textit{tugturn} button, as illustrated in Figure~\ref{fig:vaila_gui}.
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.5\linewidth]{images/vaila_start_gui.png}
+  \includegraphics[width=0.7\linewidth]{images/vaila_start_gui.png}
   \caption{The \textit{vail\'{a}} GUI, highlighting the \textit{tugturn} button used to initialize the analysis module.}
   \label{fig:vaila_gui}
 \end{figure}
