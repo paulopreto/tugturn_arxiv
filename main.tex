@@ -16,12 +16,12 @@
 \usepackage{orcidlink}
 \usepackage{tikz}
 \usepackage{algorithm}
-\usepackage{algorithmic}
+\usepackage{algpseudocode}
 \usepackage{pdfpages}
 \usetikzlibrary{arrows.meta, positioning}
 \AtBeginDocument{\setlength{\headheight}{23pt}}
 
-\title{tugturn: A Markerless 3D Pipeline for Instrumented Timed Up and Go Phase Segmentation, Gait Events, and Stability Metrics}
+\title{Automating Timed Up and Go Phase Segmentation and Gait Analysis via the tugturn Markerless 3D Pipeline}
 
 \author{
   Abel Gon\c{c}alves Chinaglia\orcidlink{0000-0002-6955-7187}$^{1,2}$ \\
@@ -175,8 +175,6 @@ XCoM = CoM + \frac{CoM_{vel}}{\omega_0}, \qquad
 where $l$ is approximated by mean vertical CoM. Phase-level XCoM deviations are exported as stability descriptors for the first and second gait.
 
 \subsection{Algorithmic Workflow (Pseudocode)}
-\textbf{Input:} 3D MediaPipe CSV file, optional TOML metadata/config, optional output path.\\
-\textbf{Output:} HTML reports, JSON report, and CSV databases (participants, results, steps, kinematics, vector coding).
 
 \begin{algorithm}[H]
 \caption{Hybrid Detection of Gait Events and Turn Phase in TUG}
