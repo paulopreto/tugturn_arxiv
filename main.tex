@@ -17,6 +17,7 @@
 \usepackage{tikz}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
+\usepackage{listings}
 \usepackage{pdfpages}
 \usetikzlibrary{arrows.meta, positioning}
 \AtBeginDocument{\setlength{\headheight}{23pt}}
@@ -76,7 +77,7 @@ The \textit{tugturn} module is designed as a highly cohesive, command-line inter
 Traditional TUG assessments treat the movement as a temporal ``black box,'' providing only total completion time. To overcome this limitation and eliminate the ``blind stopwatch'' effect, \textit{tugturn} implements a deterministic spatial segmentation algorithm that tracks the estimated Center of Mass (pelvis) along the anteroposterior progression axis (Y-axis). By applying strict spatial thresholds---specifically $Y \le 1.125$ m for the chair setup zone and $Y \approx 4.5$ m for the turning zone---the pipeline automatically slices the continuous trial into five discrete functional sub-phases: Sit-to-Stand, Forward Gait, Turning, Backward Gait, and Stand-to-Sit. This approach transforms a subjective duration test into a precise topographical examination of movement.
 
 \subsection{Gait Event Detection (Dynamic Zeni Algorithm)}
-Extracting gait events from a bidirectional test poses a significant challenge for classical coordinate-based algorithms, which often generate false positives during turns. To address this, we implemented a robust adaptation of the Zeni relative-distance algorithm \cite{Zeni2008}, enhanced by rigorous spatial and kinetic filters:
+Extracting gait events from a bidirectional test poses a significant challenge for classical coordinate-based algorithms, which often generate false positives during turns. To address this, we implemented a robust adaptation of the Zeni relative-distance algorithm \cite{zeni2008}, enhanced by rigorous spatial and kinetic filters:
 
 \begin{enumerate}
     \item \textbf{Walking Mask (Posture and Movement Filter):} Before step detection, the algorithm verifies that the subject is standing (pelvic Z-axis height within the upper third of its range) and moving (XY-plane velocity $> 0.15$ m/s). This prevents false detections during turning or postural transitions.
