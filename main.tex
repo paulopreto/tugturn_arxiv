@@ -107,20 +107,6 @@ python vaila/tugturn.py -i data/raw_kinematics/ -c config/default.toml \
     -o data/processed/ -y 0.15
 \end{lstlisting}
 
-\section{Implementation and Usage (High-Throughput Architecture)}
-Traditional 3D biomechanical analysis often requires labor-intensive, frame-by-frame manual trajectory cleaning. In contrast, \textit{tugturn.py} is engineered for scalable, high-throughput batch processing. Written in pure Python and prioritizing minimal dependencies (NumPy, Pandas, SciPy, Matplotlib, Plotly), the software ensures cross-platform compatibility.
-
-Driven by a command-line interface and configurable \texttt{.toml} files, the pipeline can automatically process entire clinical databases in minutes. Automated output generation includes detailed JSON datasets, kinematic CSV spreadsheets ready for statistical analysis (\texttt{bd\_kinematics}, \texttt{bd\_vector\_coding}), and rich interactive HTML reports with embedded GIF visualizations. This architecture successfully bridges the gap between complex data engineering and accessible clinical diagnostics.
-
-\begin{lstlisting}[language=bash, caption=Example of CLI execution for a single trial or batch directory]
-# Run analysis on a single trial with a spatial tolerance of 0.15m
-python vaila/tugturn.py -i tests/s26_m1_t1.csv -c tests/s26_m1_t1.toml \
-    -o results/ -y 0.15
-
-# Batch process an entire directory of CSV files (e.g., hundreds of clinical trials)
-python vaila/tugturn.py -i data/raw_kinematics/ -c config/default.toml \
-    -o data/processed/ -y 0.15
-\end{lstlisting}
 
 \section{Results-Oriented Software Deliverables}
 Rather than presenting a new clinical trial in this manuscript, we report the software deliverables and processing scope demonstrated by the included test workflow. The pipeline provides:
